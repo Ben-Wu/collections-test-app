@@ -7,22 +7,20 @@ import ObjectList from './js/ObjectList';
 
 const baseUrl = 'http://localhost:8000';
 
-let collections = [];
+let carts = [];
 let files = [];
 let entities = [];
 
 let userId = '';
 
 const updateUserId = () => {
-  const value = document.getElementById('user-id-input').value;
-  userId = value;
+  userId  = document.getElementById('user-id-input').value;
 };
 
-let collectionName = '';
+let cartName = '';
 
-const updateCollectionName = () => {
-  const value = document.getElementById('collection-name-input').value;
-  collectionName = value;
+const updateCartName = () => {
+  cartName = document.getElementById('cart-name-input').value;
 };
 
 let alertMessage = '';
@@ -38,16 +36,16 @@ const handleError = err => {
     }, 5000);
 };
 
-const getCollections = () => {
+const getCarts = () => {
   m.request({
     method: 'GET',
-    url: `${baseUrl}/resources/collections/`,
+    url: `${baseUrl}/resources/carts/`,
     headers: {
       'Authorization': `${userId}`,
     }
   }).then(data => {
     console.log(data);
-    collections = data;
+    carts = data;
   }).catch(handleError);
 };
 
@@ -61,40 +59,37 @@ const getFiles = () => {
   }).catch(handleError);
 };
 
-const createCollection = () => {
+const createCarts = () => {
   m.request({
     method: 'POST',
-    url: `${baseUrl}/resources/collections/${collectionName}`,
+    url: `${baseUrl}/resources/carts/${cartName}`,
     headers: {
       'Authorization': `${userId}`,
     }
   }).then(data => {
     console.log(data);
-    getCollections();
+    getCarts();
   }).catch(handleError);
 };
 
-const deleteCollection = () => {
+const deleteCarts = () => {
   m.request({
     method: 'DELETE',
-    url: `${baseUrl}/resources/collections/${collectionName}`,
+    url: `${baseUrl}/resources/carts/${cartName}`,
     headers: {
       'Authorization': `${userId}`,
-    },
-    data: {
-      collection_name: collectionName
     }
   }).then(data => {
     console.log(data);
-    getCollections();
+    getCarts();
   }).catch(handleError);
 };
 
 
-const getSingleCollection = () => {
+const getCartItems = () => {
   m.request({
     method: 'GET',
-    url: `${baseUrl}/resources/collections/${collectionName}`,
+    url: `${baseUrl}/resources/cart-items/${cartName}`,
     headers: {
       'Authorization': `${userId}`,
     }
@@ -107,26 +102,27 @@ const getSingleCollection = () => {
 const createEntity = (entityId) => {
   m.request({
     method: 'POST',
-    url: `${baseUrl}/resources/collections/${collectionName}/${entityId}`,
+    url: `${baseUrl}/resources/cart-items/${cartName}?entity_id=${entityId}`,
     headers: {
       'Authorization': `${userId}`,
-    }
+    },
+
   }).then(data => {
     console.log(data);
-    getSingleCollection();
+    getCartItems();
   }).catch(handleError);
 };
 
 const deleteEntity = (entityId) => {
   m.request({
     method: 'DELETE',
-    url: `${baseUrl}/resources/collections/${collectionName}/${entityId}`,
+    url: `${baseUrl}/resources/cart-items/${cartName}?entity_id=${entityId}`,
     headers: {
       'Authorization': `${userId}`,
     }
   }).then(data => {
     console.log(data);
-    getSingleCollection();
+    getCartItems();
   }).catch(handleError);
 };
 
@@ -140,17 +136,17 @@ const onCheckChanged = (value, properties) => {
 
 const buttonActions = {
   'Get files': getFiles,
-  'Get collections': getCollections,
-  'Create collection': createCollection,
-  'Delete collection': deleteCollection,
-  'Get single collection': getSingleCollection,
+  'Get carts': getCarts,
+  'Create cart': createCarts,
+  'Delete cart': deleteCarts,
+  'Get single cart': getCartItems,
 };
 
 const App = {
   view: () => {
     return (
       <div className="main-container">
-        <div className="header container-fluid">Collections API Test</div>
+        <div className="header container-fluid">Collections/Cart API Test</div>
 
 
         <div className="container">
@@ -166,8 +162,8 @@ const App = {
             <input id="user-id-input" type="text" className="form-control "
                    placeholder="User ID" onkeyup={updateUserId}/>
 
-            <input id="collection-name-input" type="text" className="form-control"
-                   placeholder="Collection Name" onkeyup={updateCollectionName}/>
+            <input id="cart-name-input" type="text" className="form-control"
+                   placeholder="Cart Name" onkeyup={updateCartName}/>
 
           </div>
 
@@ -179,9 +175,9 @@ const App = {
 
           </div>
 
-          <ObjectList title="Collections" objects={collections}/>
+          <ObjectList title="Collections" objects={carts}/>
 
-          <ObjectList title="Files in collection" objects={entities}/>
+          <ObjectList title="Files in cart" objects={entities}/>
 
           <ObjectList title="Files" objects={files} selectable={true}
                       onCheckChanged={onCheckChanged}/>
