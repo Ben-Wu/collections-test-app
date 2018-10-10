@@ -1,0 +1,45 @@
+.header {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #000000;
+  font-size: 20pt;
+  text-align: center;
+  color: #ffffff;
+  box-shadow: 0 0 24px #aaaaaa;
+}
+
+.object-list {
+  margin-top: 16px;
+  margin-bottom: 1px;
+  overflow-x: scroll;
+
+  .object-list-header {
+    font-size: 16pt;
+  }
+}
+
+$input-field-spacing: 16px;
+
+.input-field-container {
+  margin: 16px -1 * $input-field-spacing 24px -1 * $input-field-spacing;
+  display: flex;
+  flex-direction: row;
+
+  input {
+    margin-right: $input-field-spacing;
+    margin-left: $input-field-spacing;
+  }
+}
+
+$button-spacing: 8px;
+
+.control-buttons {
+  margin: 16px -1 * $button-spacing 24px -1 * $button-spacing;
+  display: flex;
+  flex-direction: row;
+
+  button {
+    margin-right: $button-spacing;
+    margin-left: $button-spacing;
+  }
+}
