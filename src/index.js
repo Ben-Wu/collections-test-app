@@ -143,6 +143,7 @@ const buttonActions = {
 };
 
 const App = {
+  oninit: getFiles,
   view: () => {
     return (
       <div className="main-container">
