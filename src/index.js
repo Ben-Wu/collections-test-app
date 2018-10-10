@@ -3,10 +3,13 @@ import m from "mithril";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.scss'
 
+import ObjectList from './js/ObjectList';
+
 const baseUrl = 'http://localhost:8000';
 
 let collections = [];
 let files = [];
+let entities = [];
 
 let userId = '';
 
@@ -22,15 +25,18 @@ const updateCollectionName = () => {
   collectionName = value;
 };
 
-let fileId = '';
-
-const updateFileId = () => {
-  const value = document.getElementById('file-id-input').value;
-  fileId = value;
-};
-
 let alertMessage = '';
 let showAlert = false;
+
+const handleError = err => {
+    console.error(err);
+    alertMessage = err.Message;
+    showAlert = true;
+    setTimeout(() => {
+      showAlert = false;
+      m.redraw();
+    }, 5000);
+};
 
 const getCollections = () => {
   m.request({
@@ -38,73 +44,106 @@ const getCollections = () => {
     url: `${baseUrl}/resources/collections/`,
     headers: {
       'Authorization': `${userId}`,
-    },
-    data: {}
+    }
   }).then(data => {
     console.log(data);
     collections = data;
-  }).catch(err => {
-    console.error(err);
-    alertMessage = err;
-    showAlert = true;
-    setTimeout(() => showAlert = false, 3000);
-  });
+  }).catch(handleError);
 };
 
 const getFiles = () => {
   m.request({
     method: 'GET',
-    url: `${baseUrl}/repository/files/`,
-    data: {}
+    url: `${baseUrl}/repository/files/`
   }).then(data => {
     console.log(data.hits);
     files = data.hits.flatMap(x => x.files);
-  }).catch(err => {
-    console.error(err);
-    alertMessage = err;
-    showAlert = true;
-    setTimeout(() => showAlert = false, 3000);
-  });
+  }).catch(handleError);
 };
 
-const TableRow = {
-  view: vnode => {
-    const properties = vnode.attrs.properties;
-    return (
-      <tr>
-        {properties.map(prop => <td>{prop}</td>)}
-      </tr>
-    );
+const createCollection = () => {
+  m.request({
+    method: 'POST',
+    url: `${baseUrl}/resources/collections/${collectionName}`,
+    headers: {
+      'Authorization': `${userId}`,
+    }
+  }).then(data => {
+    console.log(data);
+    getCollections();
+  }).catch(handleError);
+};
+
+const deleteCollection = () => {
+  m.request({
+    method: 'DELETE',
+    url: `${baseUrl}/resources/collections/${collectionName}`,
+    headers: {
+      'Authorization': `${userId}`,
+    },
+    data: {
+      collection_name: collectionName
+    }
+  }).then(data => {
+    console.log(data);
+    getCollections();
+  }).catch(handleError);
+};
+
+
+const getSingleCollection = () => {
+  m.request({
+    method: 'GET',
+    url: `${baseUrl}/resources/collections/${collectionName}`,
+    headers: {
+      'Authorization': `${userId}`,
+    }
+  }).then(data => {
+    console.log(data);
+    entities = data;
+  }).catch(handleError);
+};
+
+const createEntity = (entityId) => {
+  m.request({
+    method: 'POST',
+    url: `${baseUrl}/resources/collections/${collectionName}/${entityId}`,
+    headers: {
+      'Authorization': `${userId}`,
+    }
+  }).then(data => {
+    console.log(data);
+    getSingleCollection();
+  }).catch(handleError);
+};
+
+const deleteEntity = (entityId) => {
+  m.request({
+    method: 'DELETE',
+    url: `${baseUrl}/resources/collections/${collectionName}/${entityId}`,
+    headers: {
+      'Authorization': `${userId}`,
+    }
+  }).then(data => {
+    console.log(data);
+    getSingleCollection();
+  }).catch(handleError);
+};
+
+const onCheckChanged = (value, properties) => {
+  if (value) {
+    createEntity(properties.uuid);
+  } else {
+    deleteEntity(properties.uuid);
   }
 };
 
-const ObjectList = {
-  view: vnode => {
-    const title = vnode.attrs.title;
-    const objects = vnode.attrs.objects;
-
-    console.log(objects);
-
-    return (
-      <div className="object-list">
-        <div className="object-list-header">{title}</div>
-          <table className="table table-striped">
-            <thead>
-            <tr>
-              {objects.length
-                ? Object.entries(objects[0]).map(x => <th scope="col">{x[0]}</th>)
-                : ''}
-            </tr>
-            </thead>
-            <tbody>
-            {objects.length
-              ? objects.map(object => <TableRow properties={Object.entries(object).map(x => x[1])}/>)
-              : 'None found'}
-            </tbody>
-          </table>
-      </div>
-    );
-  }
+const buttonActions = {
+  'Get files': getFiles,
+  'Get collections': getCollections,
+  'Create collection': createCollection,
+  'Delete collection': deleteCollection,
+  'Get single collection': getSingleCollection,
 };
 
 const App = {
@@ -130,22 +169,23 @@ const App = {
             <input id="collection-name-input" type="text" className="form-control"
                    placeholder="Collection Name" onkeyup={updateCollectionName}/>
 
-            <input id="file-id-input" type="text" className="form-control"
-                   placeholder="File ID" onkeyup={updateFileId}/>
-
           </div>
 
           <div className="control-buttons">
 
-            <button className="btn btn-primary" onclick={getCollections}>Get collections</button>
-
-            <button className="btn btn-primary" onclick={getFiles}>Get files</button>
+            {Object.entries(buttonActions).map(entry =>
+                <button className="btn btn-primary" onclick={entry[1]}>{entry[0]}</button>
+            )}
 
           </div>
 
           <ObjectList title="Collections" objects={collections}/>
 
-          <ObjectList title="Files" objects={files}/>
+          <ObjectList title="Files in collection" objects={entities}/>
+
+          <ObjectList title="Files" objects={files} selectable={true}
+                      onCheckChanged={onCheckChanged}/>
+
         </div>
       </div>
     );
