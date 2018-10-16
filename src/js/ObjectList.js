@@ -5,19 +5,17 @@ import '../index.scss'
 
 const TableRow = {
   view: vnode => {
-    const onCheckChanged = vnode.attrs.onCheckChanged;
     const properties = vnode.attrs.properties;
+    const buttonProperties = vnode.attrs.buttonProperties;
 
-    const onChange = (element) => {
-      const checkValue = element.target.checked;
-      onCheckChanged(checkValue, properties);
-    };
-
-    const checkbox = vnode.attrs.selectable
-      ? <td className="table-checkbox" onchange={onChange}><input type="checkbox"/></td>
+    const button = buttonProperties
+      ? <button className={`btn ${buttonProperties.buttonClass}`}
+                onclick={() => buttonProperties.onButtonClick(properties)}>
+        {buttonProperties.buttonText}
+        </button>
       : '';
 
-    const values = [checkbox].concat(Object.entries(properties).map(x => <td>{x[1]}</td>));
+    const values = [button].concat(Object.entries(properties).map(x => <td>{x[1]}</td>));
 
     return (
       <tr className="object-table-row">
@@ -31,8 +29,8 @@ const ObjectList = {
   view: vnode => {
     const title = vnode.attrs.title;
     const objects = vnode.attrs.objects;
-    const onCheckChanged = vnode.attrs.onCheckChanged;
-    const selectable = vnode.attrs.selectable;
+    const addButton = vnode.attrs.addButton;
+    const buttonProperties = vnode.attrs.buttonProperties;
 
     return (
       <div className="object-list">
@@ -41,7 +39,7 @@ const ObjectList = {
             <thead>
             <tr>
               {objects.length
-                ? [selectable ? <th scope="col">Selected</th> : '']
+                ? [addButton ? <th scope="col"/> : '']
                   .concat(Object.entries(objects[0]).map(x => <th scope="col">{x[0]}</th>))
                 : ''}
             </tr>
@@ -49,9 +47,8 @@ const ObjectList = {
             <tbody>
             {objects.length
               ? objects.map(object =>
-                <TableRow selectable={selectable}
-                          onCheckChanged={onCheckChanged}
-                          properties={object}/>)
+                <TableRow properties={object}
+                          buttonProperties={addButton ? buttonProperties : ''}/>)
               : 'None found'}
             </tbody>
           </table>

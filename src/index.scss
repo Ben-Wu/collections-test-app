@@ -16,6 +16,10 @@
   .object-list-header {
     font-size: 16pt;
   }
+
+  button {
+    margin: 8px;
+  }
 }
 
 $input-field-spacing: 16px;
@@ -34,13 +38,10 @@ $input-field-spacing: 16px;
 $button-spacing: 8px;
 
 .control-buttons {
-  margin: 16px -1 * $button-spacing 24px -1 * $button-spacing;
-  display: flex;
-  flex-direction: row;
+  margin: 0 -1 * $button-spacing 0 -1 * $button-spacing;
 
   button {
-    margin-right: $button-spacing;
-    margin-left: $button-spacing;
+    margin: $button-spacing;
   }
 }
 
