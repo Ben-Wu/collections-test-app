@@ -34,7 +34,7 @@ let showAlert = false;
 
 const handleError = err => {
     console.error(err);
-    alertMessage = err.Message;
+    alertMessage = err.Message ? err.Message : err;
     showAlert = true;
     setTimeout(() => {
       showAlert = false;
@@ -43,6 +43,10 @@ const handleError = err => {
 };
 
 const getCarts = () => {
+  if (!userId) {
+    handleError('User ID required');
+    return;
+  }
   m.request({
     method: 'GET',
     url: `${baseUrl}/resources/carts/`,
@@ -61,11 +65,15 @@ const getFiles = () => {
     url: `${baseUrl}/repository/files/`
   }).then(data => {
     console.log(data.hits);
-    files = data.hits.flatMap(x => x.files);
+    files = data.hits.flatMap(hit => hit.files.map(file => Object.assign(file, hit.bundles[0])));
   }).catch(handleError);
 };
 
 const createCart = () => {
+  if (!userId || !cartName) {
+    handleError('User ID and Cart name required');
+    return;
+  }
   m.request({
     method: 'POST',
     url: `${baseUrl}/resources/carts/`,
@@ -82,6 +90,10 @@ const createCart = () => {
 };
 
 const deleteCart = (givenId) => {
+  if (!userId) {
+    handleError('User ID required');
+    return;
+  }
   m.request({
     method: 'DELETE',
     url: `${baseUrl}/resources/carts/${givenId}`,
@@ -96,9 +108,13 @@ const deleteCart = (givenId) => {
 
 
 const getCartItems = () => {
+  if (!userId || !cartId) {
+    handleError('User ID and Cart ID required');
+    return;
+  }
   m.request({
     method: 'GET',
-    url: `${baseUrl}/resources/cart-items/${cartId}`,
+    url: `${baseUrl}/resources/carts/${cartId}/items`,
     headers: {
       'Authorization': `${userId}`,
     }
@@ -108,16 +124,23 @@ const getCartItems = () => {
   }).catch(handleError);
 };
 
-const addToCart = (entityId) => {
+const addToCart = (entityId, bundleId, bundleVersion) => {
+  if (!userId || !cartId) {
+    handleError('User ID and Cart ID required');
+    return;
+  }
   m.request({
     method: 'POST',
-    url: `${baseUrl}/resources/cart-items/${cartName}?entity_id=${entityId}`,
+    url: `${baseUrl}/resources/cart-items`,
     headers: {
       'Authorization': `${userId}`,
     },
     data: {
+      entityType: 'files',
       cartId,
-      entityId
+      entityId,
+      bundleId,
+      bundleVersion
     }
   }).then(data => {
     console.log(data);
@@ -126,6 +149,10 @@ const addToCart = (entityId) => {
 };
 
 const deleteFromCart = (cartItemId) => {
+  if (!userId) {
+    handleError('User ID required');
+    return;
+  }
   m.request({
     method: 'DELETE',
     url: `${baseUrl}/resources/cart-items/${cartItemId}`,
@@ -142,8 +169,7 @@ const buttonActions = {
   'Get files': getFiles,
   'Get carts': getCarts,
   'Create cart': createCart,
-  //'Delete cart': deleteCart,
-  'Get single cart': getCartItems,
+  'Get items in cart': getCartItems,
 };
 
 const App = {
@@ -209,7 +235,8 @@ const App = {
                         {
                           buttonClass: "btn-success",
                           buttonText: "Add to cart",
-                          onButtonClick: (properties => addToCart(properties.uuid))
+                          onButtonClick: (properties => addToCart(
+                            properties.uuid, properties.bundleUuid, properties.bundleVersion))
                         }
                       }/>
 
