@@ -1,29 +1,19 @@
 # Collections Test App
 
-Test app for azul collections API
+Test app for azul Cart API
 
 ### Usage
 
 ##### Install dependencies
 
 ```sh
-yarn
+yarn / npm install
 ```
-
-or
-
-```sh
-npm install
-```
-
 
 ##### Run
 
 ```sh
-yarn start
+yarn start / npm run start
 ```
 
-or 
-```sh
-npm run start
-```
+App expects a local azul service to be running on `http://localhost:8000`

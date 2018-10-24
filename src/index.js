@@ -131,13 +131,12 @@ const addToCart = (entityId, bundleId, bundleVersion) => {
   }
   m.request({
     method: 'POST',
-    url: `${baseUrl}/resources/cart-items`,
+    url: `${baseUrl}/resources/carts/${cartId}/items`,
     headers: {
       'Authorization': `${userId}`,
     },
     data: {
       entityType: 'files',
-      cartId,
       entityId,
       bundleId,
       bundleVersion
@@ -155,7 +154,7 @@ const deleteFromCart = (cartItemId) => {
   }
   m.request({
     method: 'DELETE',
-    url: `${baseUrl}/resources/cart-items/${cartItemId}`,
+    url: `${baseUrl}/resources/carts/${cartId}/items/${cartItemId}`,
     headers: {
       'Authorization': `${userId}`,
     }
